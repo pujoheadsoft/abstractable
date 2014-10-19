@@ -12,6 +12,12 @@ module Abstractable
       find_from_pedigree_stream(PedigreeStream.new(klass))
     end
 
+    # find_from_singleton(klass) -> hash
+    # singleton_class version find.
+    def find_from_singleton(klass)
+      find_from_pedigree_stream(SingletonPedigreeStream.new(klass))
+    end
+
     private
 
     def find_from_pedigree_stream(pedigree_stream)

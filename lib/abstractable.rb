@@ -45,7 +45,7 @@ module Abstractable
   def abstract_methods(all = true)
     return individual_abstract_methods unless all
     collect = lambda { |klass, array| array.push(*klass.abstract_methods(false)) if klass.is_a? Abstractable }
-    (ancestors - [self]).each_with_object([], &collect) + individual_abstract_methods
+    individual_abstract_methods + (ancestors - [self]).each_with_object([], &collect)
   end
 
   # Unimplemented abstract methods validation.
@@ -69,21 +69,17 @@ module Abstractable
 
   # called when the method is undef.
   def method_undefined(method)
-    ancestors.each { |klass| klass.undef_abstract(method) if klass.is_a? Abstractable }
-  end
-
-  # undef_abstract(*names) -> array
-  #
-  # Undefine of abstract method in receiver class.
-  # Returns an array of the method names that the delete was successful.
-  #
-  def undef_abstract(*names)
-    names.map { |name| individual_abstract_methods.delete name }.compact
+    individual_abstract_methods.delete(method)
   end
 
   # Shortcut to NotImplementedInfoFinder.new.find(klass)
   def self.find_not_implemented_info(klass)
     NotImplementedInfoFinder.new.find(klass)
+  end
+
+  # Shortcut to NotImplementedInfoFinder.new.find_from_singleton(klass)
+  def self.find_not_implemented_info_from_singleton(klass)
+    NotImplementedInfoFinder.new.find_from_singleton(klass)
   end
 
   private

@@ -5,12 +5,12 @@ module Abstractable
 
     def initialize(klass)
       fail ArgumentError, "wrong type argument #{klass} (should be Class) " unless klass.is_a? Class
-      @pedigree_stream = klass.ancestors.reverse
+      self.pedigree_stream = pedigree_stream_of(klass)
     end
 
     # each for Enumerable.
     def each
-      @pedigree_stream.each { |klass| yield klass }
+      pedigree_stream.each { |klass| yield klass }
     end
 
     # each with descendants
@@ -41,8 +41,23 @@ module Abstractable
     # descendants_of(klass) -> array
     # Returns an array of descendants name of class.
     def descendants_of(klass)
-      i = @pedigree_stream.index(klass)
-      i ? @pedigree_stream.drop(i + 1) : []
+      i = pedigree_stream.index(klass)
+      i ? pedigree_stream.drop(i + 1) : []
+    end
+
+    protected
+
+    attr_accessor :pedigree_stream
+
+    def pedigree_stream_of(klass)
+      klass.ancestors.reverse
+    end
+  end
+
+  # PedigreeStream of Singleton Class.
+  class SingletonPedigreeStream < PedigreeStream
+    def pedigree_stream_of(klass)
+      klass.ancestors.reverse.map(&:singleton_class)
     end
   end
 end

@@ -204,17 +204,29 @@ describe Abstractable, "delete  abstract" do
 
     expect { XMLDocumentWriter.new }.to raise_error(NotImplementedError)
 
-    class XMLDocumentWriter
-      undef_method :write
-      undef_method :write_document
+    class AbstractXMLDocumentWriter
+      undef_method :to_xml
     end
 
-    expect(AbstractXMLDocumentWriter.undef_abstract :to_xml, :open, :close).to eq([:to_xml])
+    expect(XMLDocumentWriter.abstract_methods).to eq([:write_document, :write, :open, :close])
+    expect(AbstractXMLDocumentWriter.abstract_methods).to eq([:write_document, :write, :open, :close])
+    expect(AbstractWriter.abstract_methods).to eq([:write, :open, :close])
 
-    expect(AbstractWriter.undef_abstract :open, :yyy, :close).to eq([:open, :close])
+    class AbstractDocumentWriter
+      undef_method :write_document, :open, :close
+    end
 
-    expect { XMLDocumentWriter.new }.not_to raise_error
+    expect(XMLDocumentWriter.abstract_methods).to eq([:write, :open, :close])
+    expect(AbstractXMLDocumentWriter.abstract_methods).to eq([:write, :open, :close])
+    expect(AbstractWriter.abstract_methods).to eq([:write, :open, :close])
 
+    class AbstractWriter
+      undef_method :write, :open, :close
+    end
+
+    expect(XMLDocumentWriter.abstract_methods).to eq([])
+    expect(AbstractXMLDocumentWriter.abstract_methods).to eq([])
+    expect(AbstractWriter.abstract_methods).to eq([])
   end
 
 end
@@ -226,11 +238,6 @@ describe Abstractable, "Class method" do
       class << self
         extend Abstractable
         abstract :name
-
-        # for old ruby
-        def eigen_class
-          class << self; self; end
-        end
       end
     end
 
@@ -243,7 +250,7 @@ describe Abstractable, "Class method" do
   end
 
   it "not implemented class method" do
-    message = "name is abstract method defined in #{AbstractApplication.eigen_class}, and must implement."
+    message = "name is abstract method defined in #{AbstractApplication.singleton_class}, and must implement."
     expect do
       NotImplApplication.name
     end.to raise_error(NotImplementedError, message)
@@ -251,6 +258,12 @@ describe Abstractable, "Class method" do
 
   it "implemented class method" do
     expect { Application.new }.not_to raise_error
+  end
+
+  it "find not implemented info from singleton class" do
+    h = {AbstractApplication.singleton_class => [:name]}
+    expect(Abstractable.find_not_implemented_info_from_singleton(NotImplApplication)).to eq(h)
+    expect(Abstractable.find_not_implemented_info_from_singleton(Application)).to eq({})
   end
 
 end
