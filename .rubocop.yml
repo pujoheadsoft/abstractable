@@ -1,7 +1,7 @@
 HashSyntax:
-  EnforcedStyle: ruby18
+  EnforcedStyle: ruby19
   SupportedStyles:
-    - ruby18
+    - ruby19
     - hash_rockets
 
 Documentation:
