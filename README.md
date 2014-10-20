@@ -175,18 +175,35 @@ Therefore throw error at abstract method call.
 But can find unimplemented abstract methods.
 ```ruby
 class AbstractParent
+  extend Abstractable
+
   class << self
     extend Abstractable
     abstract :greet
   end
 end
 
-class Child < AbstractParent
+class AbstractChild < AbstractParent
+  class << self
+    abstract :say
+  end
 end
+
+class Child < AbstractChild; end
 
 Child.greet # => greet is abstract method defined in
             # #<Class:AbstractParent>, and must implement.
             # (NotImplementedError)
+```
+##### Get defined abstract methods in singleton class
+*abstract_singleton_methods* Returns an array containing the names of abstract methods  
+in the receivers singleton class.  
+if set *true* to args include ancestor singleton classes abstract methods (default *true*).
+```ruby
+Child.abstract_singleton_methods                # => [:say, :greet]
+Child.abstract_singleton_methods(false)         # => []
+AbstractChild.abstract_singleton_methods        # => [:say, :greet]
+AbstractChild.abstract_singleton_methods(false) # => [:say]
 ```
 ### Do explicitly validation
 if call *validate_not_implemented_abstract_methods* then can do explicitly validation.
