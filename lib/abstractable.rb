@@ -43,9 +43,17 @@ module Abstractable
   # (default true)
   #
   def abstract_methods(all = true)
-    return individual_abstract_methods unless all
-    collect = lambda { |klass, array| array.push(*klass.abstract_methods(false)) if klass.is_a? Abstractable }
-    individual_abstract_methods + (ancestors - [self]).each_with_object([], &collect)
+    do_abstract_methods(all, self, (ancestors - [self]))
+  end
+
+  # abstract_singleton_methods(all=true)   -> array
+  #
+  # Returns an array containing the names of abstract methods in the receivers singleton class.
+  # if set true to args include ancestor singleton classes abstract methods.
+  # (default true)
+  #
+  def abstract_singleton_methods(all = true)
+    do_abstract_methods(all, singleton_class, (ancestors - [self]).map(&:singleton_class))
   end
 
   # Unimplemented abstract methods validation.
@@ -81,6 +89,18 @@ module Abstractable
 
   def individual_abstract_methods
     @individual_abstract_methods ||= []
+  end
+
+  def do_abstract_methods(all = true, klass, ancestors_of_klass)
+    result = []
+    individual_abstract_methods_reader = lambda { |clazz| clazz.class_eval { individual_abstract_methods } }
+    if klass.is_a? Abstractable
+      result.push(*individual_abstract_methods_reader.call(klass))
+      return result unless all
+    end
+    ancestors_of_klass.each_with_object(result) do |ancestor, array|
+      array.push(*individual_abstract_methods_reader.call(ancestor)) if ancestor.is_a? Abstractable
+    end
   end
 
   def validate_on_create(create_method_name)

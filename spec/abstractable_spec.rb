@@ -241,10 +241,18 @@ describe Abstractable, "Class method" do
       end
     end
 
-    class NotImplApplication < AbstractApplication; end
+    class AbstractSubApplication < AbstractApplication
+      class << self
+        abstract :version, :help
+      end
+    end
 
-    class Application < AbstractApplication
+    class NotImplApplication < AbstractSubApplication; end
+
+    class Application < AbstractSubApplication
       def self.name; end
+      def self.version; end
+      def self.help; end
     end
 
   end
@@ -261,9 +269,18 @@ describe Abstractable, "Class method" do
   end
 
   it "find not implemented info from singleton class" do
-    h = {AbstractApplication.singleton_class => [:name]}
+    h = {AbstractApplication.singleton_class => [:name],
+         AbstractSubApplication.singleton_class => [:version, :help]
+    }
     expect(Abstractable.find_not_implemented_info_from_singleton(NotImplApplication)).to eq(h)
     expect(Abstractable.find_not_implemented_info_from_singleton(Application)).to eq({})
+  end
+
+  it "get abstract methods of singleton class" do
+    AbstractApplication.extend Abstractable
+    expect(AbstractApplication.abstract_singleton_methods).to eq([:name])
+    expect(AbstractSubApplication.abstract_singleton_methods).to eq([:version, :help, :name])
+    expect(AbstractSubApplication.abstract_singleton_methods(false)).to eq([:version, :help])
   end
 
 end
