@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["pujoheadsoft@gmail.com"]
   spec.summary       = "Library for define abstract method."
   spec.description   = "Library for define abstract method. Can know unimplemented abstract methods by fail fast as possible. This mechanism is very useful for prevent the implementation leakage."
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/pujoheadsoft/abstractable"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
