@@ -67,11 +67,6 @@ module Abstractable
     !ENV["ABSTRACTABLE_IGNORE_VALIDATE"] && @implemented_abstract_methods != abstract_methods
   end
 
-  # called when the method is undef.
-  def method_undefined(method)
-    individual_abstract_methods.delete(method)
-  end
-
   # Shortcut to NotImplementedInfoFinder.new.find(klass)
   def self.find_not_implemented_info(klass)
     NotImplementedInfoFinder.new.find(klass)
@@ -124,5 +119,10 @@ module Abstractable
     fail ArgumentError, "wrong type argument #{method} (should be Symbol) " unless method.is_a? Symbol
     individual_abstract_methods << method
     define_abstract_skeleton(method)
+  end
+
+  # called when the method is undef.
+  def method_undefined(method)
+    individual_abstract_methods.delete(method)
   end
 end
